@@ -4,6 +4,8 @@ import 'gamecom.dart';
 
 const cardcolor = Color(0xff49BEAA);
 const buttoncolor = Color(0xffEEB868);
+const appbarColor = Color(0xffEF767A);
+const bgcolor = Color(0xff456990);
 
 class QuizPageState extends StatefulWidget {
   QuizPageState({
@@ -85,8 +87,14 @@ class QuizPage extends State<QuizPageState> {
     Navigator.of(context).pop();
   }
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
+    return Scaffold(
+      backgroundColor: bgcolor,
+        appBar: new AppBar(
+          title: new Text("Quizzy", style: GoogleFonts.bungee()),
+          backgroundColor: appbarColor,
+          centerTitle: true,
+        ),
+        body: Column(
             children: <Widget>[
               SizedBox(height: 20),
               questionCard(5, 'wtf is this'),
