@@ -15,7 +15,9 @@ Widget quizPage(int number, String question, List answers){
   return Center(
     child: Column(
       children: <Widget>[
+        SizedBox(height: 20),
         questionCard(number, question),
+        SizedBox(height: 20),
         answerCard(answers)
       ]
     )
@@ -32,9 +34,10 @@ Widget questionCard(int number, String question) {
     child: Column(
       children: <Widget>[
         ListTile(
-          leading: Icon(Icons.assignment),
-          title: Text("Question $number", style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
-          subtitle: Text(question, style: GoogleFonts.bungee(fontSize: 15, textStyle: TextStyle(color: Colors.white))),
+          contentPadding: EdgeInsets.all(20),
+          leading: Icon(Icons.question_answer),
+          title: Text("Question $number", style: GoogleFonts.bungee(fontSize: 30, textStyle: TextStyle(color: Colors.white, decoration: TextDecoration.underline))),
+          subtitle: Text(question, style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
         ),
       ],
     ),
@@ -49,25 +52,12 @@ Widget answerCard(List answers) {
         borderRadius: BorderRadius.circular(30.0),
       ),
     child: Column(
-      
       children: <Widget>[
-        SizedBox(
-          width: double.infinity,
-          child: FlatButton(
-            padding: EdgeInsets.all(16.0),
-            child: Text(answers[0], style: GoogleFonts.bungee(textStyle: TextStyle(color: Colors.white))),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0),
-            ),
-            color: buttoncolor,
-            onPressed: () {},
-          ),
-        ),
-        SizedBox (
-          width: 500,
+        Padding(
+          padding: EdgeInsets.all(20.0),
           child: FlatButton(
             padding: EdgeInsets.all(20.0),
-            child: Text(answers[1], style: GoogleFonts.bungee(textStyle: TextStyle(color: Colors.white))),
+            child: Text(answers[0], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30.0),
             ),
@@ -75,11 +65,11 @@ Widget answerCard(List answers) {
             onPressed: () {},
           ),
         ),
-        SizedBox (
-          width: double.infinity,
+        Padding (
+          padding: EdgeInsets.all(20.0),
           child: FlatButton(
-            padding: EdgeInsets.all(16.0),
-            child: Text(answers[2], style: GoogleFonts.bungee(textStyle: TextStyle(color: Colors.white))),
+            padding: EdgeInsets.all(20.0),
+            child: Text(answers[1], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30.0),
             ),
@@ -87,11 +77,23 @@ Widget answerCard(List answers) {
             onPressed: () {},
           ),
         ),
-        SizedBox (
-          width: double.infinity,
+        Padding (
+          padding: EdgeInsets.all(20.0),
           child: FlatButton(
-            padding: EdgeInsets.all(16.0),
-            child: Text(answers[3], style: GoogleFonts.bungee(textStyle: TextStyle(color: Colors.white))),
+            padding: EdgeInsets.all(20.0),
+            child: Text(answers[2], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.0),
+            ),
+            color: buttoncolor,
+            onPressed: () {},
+          ),
+        ),
+        Padding (
+          padding: EdgeInsets.all(20.0),
+          child: FlatButton(
+            padding: EdgeInsets.all(20.0),
+            child: Text(answers[3], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30.0),
             ),
