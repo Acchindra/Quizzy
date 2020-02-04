@@ -1,19 +1,8 @@
-/**
-* Parameters
-*/
-var webSocketsServerPort = 34263; // Adapt to the listening port number you want to use
-/**
-* Global variables
-*/
-// websocket and http servers
+var webSocketsServerPort = 34263;
 var webSocketServer = require('websocket').server;
 var http = require('http');
-/**
-* HTTP server to implement WebSockets
-*/
 var server = http.createServer(function(request, response) {
-  // Not important for us. We're writing WebSocket server,
-  // not HTTP server
+
 });
 server.listen(webSocketsServerPort, function() {
   console.log((new Date()) + " Server is listening on port "
@@ -26,7 +15,6 @@ server.listen(webSocketsServerPort, function() {
 var wsServer = new webSocketServer({
   // WebSocket server is tied to a HTTP server. WebSocket
   // request is just an enhanced HTTP request. For more info 
-  // http://tools.ietf.org/html/rfc6455#page-6
   httpServer: server
 });
 
@@ -77,14 +65,10 @@ wsServer.on('request', function(request) {
         // that the first one resigned
         //
           case 'resign':
-          console.log('resigned');
-            Players[player.opponentIndex]
-              .connection
-              .sendUTF(JSON.stringify({'action':'resigned'}));
-
-            setTimeout(function(){
-              Players[player.opponentIndex].opponentIndex = player.opponentIndex = null;
-            }, 0);
+          console.log(request.key + " has exited.");
+            Players.forEach(player => {
+                player.connection.sendUTF(JSON.stringify({'action':'resigned'}))
+            });
             break;
 
         //
@@ -107,6 +91,62 @@ wsServer.on('request', function(request) {
               .connection
               .sendUTF(JSON.stringify({'action':'play', 'data': message.data}));
             break;
+
+        // if someone creates a game we want to send them to join the game using join_game while also sending new_game to display in the lobby for other players to see
+        case 'create_game':
+            let id = generateId();
+            player.sendUTF(JSON.stringify({'action':'join_game', 'data': {'id':id, 'players': ''}}))
+            Players.forEach(p => {
+                if (p.inLobby) {
+                    p.sendUTF(JSON.stringify({'action':'new_game', 'data': id}))
+                }
+            });
+            break;
+        
+        // if people click a button to join we send them in
+
+        case 'join_game':
+            player.sendUTF(JSON.stringify({'action':'join_game', 'data': {'id':message.data[index], 'players':Players.filter(p => p.index === message.data)}}));
+            Players.filter(p => p.gameIndex === true).forEach(p => {
+                p.sendUTF(JSON.stringify({'action':'new_player', 'data': message.data[player.name]}))
+            })
+
+            break;
+        case 'select_answer':
+
+            // find the question set
+            let qset = QuestionSets.filter(qset => qset.id === message.data[id])[0]
+
+            //find the correct answer
+            let correctAnswer = qset[message.data[index]].getAnswer()
+
+            // see if they match 
+            let result = (correctAnswer === message.data[answer]);
+
+            // if it's right add one
+            if (result) {Scores[player.id]++}
+
+            // send the result back to the player (true or false meaning they got it right or wrong)
+            player.sendUTF(JSON.stringify({'action':'result_answer', 'data': result}));
+
+            // if they are on the last problem we need to end their game with their final score
+            if (message.data[index] === qset.length) {
+                player.sendUTF(JSON.stringify({'action':'end_game', 'data': Scores[player.id]}));
+            }
+
+            // otherwise send them the next question
+            else {
+                let nextQuestion = qset[message.data[index+1]];
+                player.sendUTF(JSON.stringify({'action':'next_question', 'data': {'question_text':nextQuestion.question, 'answer_choices': nextQuestion.answerChoices}}));
+            }
+
+            // send the opponents the results too so they can see it live
+            Players.filter(p => p.gameIndex === true).forEach(p => {
+                p.sendUTF(JSON.stringify({'action':'opponent_result', 'data': result}))
+            })
+
+            break;
+            
       }
     });
 
@@ -121,16 +161,19 @@ wsServer.on('request', function(request) {
 // List of all players
 // -----------------------------------------------------------
 var Players = [];
+var QuestionSets = [];
+var Scores = []
 
 function Player(id, connection){
     this.id = id;
     this.connection = connection;
     this.name = "";
-    this.opponentIndex = null;
-    this.index = Players.length;
+    this.gameIndex = null;
+    this.inLobby = true;
 }
 
-Player.prototype = {
+
+/*Player.prototype = {
     getId: function(){
         return {name: this.name, id: this.id};
     },
@@ -144,7 +187,7 @@ Player.prototype = {
             }
         });
     }
-};
+};*/
 
 // ---------------------------------------------------------
 // Routine to broadcast the list of all players to everyone
@@ -153,7 +196,7 @@ function BroadcastPlayersList(){
     var playersList = [];
     Players.forEach(function(player){
         if (player.name !== ''){
-            playersList.push(player.getId());
+            playersList.push(player.name);
         }
     });
 
@@ -165,4 +208,14 @@ function BroadcastPlayersList(){
     Players.forEach(function(player){
         player.connection.sendUTF(message);
     });
+}
+
+function generateId() {
+    let result = 0;
+    for(let i = 0 ; i < 10; i++) {
+        result *= 10;
+        result += Math.floor(Math.random()*10);
+    }
+
+    return result;
 }
