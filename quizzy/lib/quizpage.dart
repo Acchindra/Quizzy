@@ -1,27 +1,90 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quizzy/quizpage.dart';
-import 'package:quizzy/main.dart';
+import 'gamecom.dart';
 
 const cardcolor = Color(0xff49BEAA);
 const buttoncolor = Color(0xffEEB868);
 
-Widget quizPage(int number, String question, List answers){
-  return Center(
-    child: Column(
-      children: <Widget>[
-        SizedBox(height: 20),
-        questionCard(number, question),
-        SizedBox(height: 20),
-        answerCard(answers)
-      ]
-    )
-  );
+class QuizPageState extends StatefulWidget {
+  QuizPageState({
+    Key key,
+    this.question,
+    this.number,
+    this.answers
+  }): super(key: key);
+
+  final String question;
+  final int number;
+  final List answers;
+
+  @override
+  QuizPage createState() => QuizPage();
+}
+class QuizPage extends State<QuizPageState> {
+  @override
+  void initState(){
+    super.initState();
+    ///
+    /// Ask to be notified when a message from the server
+    /// comes in.
+    ///
+    game.addListener(_onAction);
+  }
+
+  @override
+  void dispose(){
+    game.removeListener(_onAction);
+    super.dispose();
+  }
+
+  /// ---------------------------------------------------------
+  /// The opponent took an action
+  /// Handler of these actions
+  /// ---------------------------------------------------------
+  _onAction(message){
+    switch(message["action"]){
+    ///
+    /// The opponent resigned, so let's leave this screen
+    ///
+      case 'resigned':
+        Navigator.of(context).pop();
+        break;
+
+    ///
+    /// The opponent played a move.
+    /// So record it and rebuild the board
+    ///
+      case 'play':
+        var data = (message["data"] as String).split(';');
+        //grid[int.parse(data[0])] = data[1];
+
+        // Force rebuild
+        setState((){});
+        break;
+    }
+  }
+
+  /// ---------------------------------------------------------
+  /// This player resigns
+  /// We need to send this notification to the other player
+  /// Then, leave this screen
+  /// ---------------------------------------------------------
+  _doResign(){
+    game.send('resign', '');
+    Navigator.of(context).pop();
+  }
+  Widget build(BuildContext context) {
+    return Center(
+        child: Column(
+            children: <Widget>[
+              SizedBox(height: 20),
+              questionCard(widget.number, widget.question),
+              SizedBox(height: 20),
+              answerCard(widget.answers)
+            ]
+        )
+    );
+  }
 }
 
 Widget questionCard(int number, String question) {

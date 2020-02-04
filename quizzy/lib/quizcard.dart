@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:quizzy/quizpage.dart';
-import 'package:quizzy/main.dart';
 
 Widget quizCard(String name, String des){
     const cardcolor = Color(0xff49BEAA);
