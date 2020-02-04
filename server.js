@@ -1,5 +1,3 @@
-const User = require('./Player.js/index.js')
-
 var webSocketsServerPort = 34263;
 var webSocketServer = require('websocket').server;
 var http = require('http');
@@ -66,7 +64,7 @@ wsServer.on('request', function(request) {
         // between the 2 players and notify the other player 
         // that the first one resigned
         //
-          case 'exist':
+          case 'resign':
           console.log(request.key + " has exited.");
             Players.forEach(player => {
                 player.connection.sendUTF(JSON.stringify({'action':'resigned'}))
@@ -96,17 +94,21 @@ wsServer.on('request', function(request) {
 
         // if someone creates a game we want to send them to join the game using join_game while also sending new_game to display in the lobby for other players to see
         case 'create_game':
-            player.sendUTF(JSON.stringify({'action':'join_game', 'data': player.name}))
+            let id = generateId();
+            player.sendUTF(JSON.stringify({'action':'join_game', 'data': {'id':id, 'players': ''}}))
             Players.forEach(p => {
                 if (p.inLobby) {
-                    p.sendUTF(JSON.stringify({'action':'new_game', 'data': player.name}))
+                    p.sendUTF(JSON.stringify({'action':'new_game', 'data': id}))
                 }
             });
         
         // if people click a button to join we send them in
-        
+
         case 'join_game':
-            player.sendUTF(JSON.stringify({'action':'join_game', 'data': message.data}));
+            player.sendUTF(JSON.stringify({'action':'join_game', 'data': {'id':message.data[index], 'players':Players.filter(p => p.index === message.data)}}));
+            Players.filter(p => p.gameIndex === true).forEach(p => {
+                p.sendUTF(JSON.stringify({'action':'new_player', 'data': message.data[player.name]}))
+            })
         case 'select_answer':
 
             // find the question set
@@ -203,4 +205,14 @@ function BroadcastPlayersList(){
     Players.forEach(function(player){
         player.connection.sendUTF(message);
     });
+}
+
+function generateId() {
+    let result = 0;
+    for(let i = 0 ; i < 10; i++) {
+        result *= 10;
+        result += Math.floor(Math.random()*10);
+    }
+
+    return result;
 }
