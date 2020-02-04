@@ -105,42 +105,48 @@ wsServer.on('request', function(request) {
         // if people click a button to join we send them in
 
         case 'join_game':
-            player.sendUTF(JSON.stringify({'action':'join_game', 'data': {'id':message.data[index], 'players':Players.filter(p => p.index === message.data)}}));
-            Players.filter(p => p.gameIndex === true).forEach(p => {
-                p.sendUTF(JSON.stringify({'action':'new_player', 'data': message.data[player.name]}))
-            })
-        case 'select_answer':
-
-            // find the question set
-            let qset = QuestionSets.filter(qset => qset.id === message.data[id])[0]
-
-            //find the correct answer
-            let correctAnswer = qset[message.data[index]].getAnswer()
-
-            // see if they match 
-            let result = (correctAnswer === message.data[answer]);
-
-            // if it's right add one
-            if (result) {Scores[player.id]++}
-
-            // send the result back to the player (true or false meaning they got it right or wrong)
-            player.sendUTF(JSON.stringify({'action':'result_answer', 'data': result}));
-
-            // if they are on the last problem we need to end their game with their final score
-            if (message.data[index] === qset.length) {
-                player.sendUTF(JSON.stringify({'action':'end_game', 'data': Scores[player.id]}));
-            }
-
-            // otherwise send them the next question
-            else {
-                let nextQuestion = qset[message.data[index+1]];
-                player.sendUTF(JSON.stringify({'action':'next_question', 'data': {'question_text':nextQuestion.question, 'answer_choices': nextQuestion.answerChoices}}));
-            }
-
-            // send the opponents the results too so they can see it live
-            Players.filter(p => p.gameIndex === true).forEach(p => {
-                p.sendUTF(JSON.stringify({'action':'opponent_result', 'data': result}))
-            })
+            console.log('joinGame passed');
+            console.log(player.name);
+            player.connection.sendUTF(JSON.stringify({'action':'join_game', 'data': 'hi'}));
+            console.log('joinGame passed 2');
+            Players.forEach(p => {
+                console.log(p.name)
+                p.connection.sendUTF(JSON.stringify({'action':'next_question', 'data': {'question_text':'Question 1', 'answer_choices': ['a', 'b', 'c', 'd']}}));
+            });
+              console.log('it made it past next_question');
+              
+//        case 'select_answer':
+//
+//            // find the question set
+//            let qset = QuestionSets.filter(qset => qset.id === message.data[id])[0]
+//
+//            //find the correct answer
+//            let correctAnswer = qset[message.data[index]].getAnswer()
+//
+//            // see if they match 
+//            let result = (correctAnswer === message.data[answer]);
+//
+//            // if it's right add one
+//            if (result) {Scores[player.id]++}
+//
+//            // send the result back to the player (true or false meaning they got it right or wrong)
+//            player.sendUTF(JSON.stringify({'action':'result_answer', 'data': result}));
+//
+//            // if they are on the last problem we need to end their game with their final score
+//            if (message.data[index] === qset.length) {
+//                player.sendUTF(JSON.stringify({'action':'end_game', 'data': Scores[player.id]}));
+//            }
+//
+//            // otherwise send them the next question
+//            else {
+//                let nextQuestion = qset[message.data[index+1]];
+//                player.sendUTF(JSON.stringify({'action':'next_question', 'data': {'question_text':nextQuestion.question, 'answer_choices': nextQuestion.answerChoices}}));
+//            }
+//
+//            // send the opponents the results too so they can see it live
+//            Players.filter(p => p.gameIndex === true).forEach(p => {
+//                p.sendUTF(JSON.stringify({'action':'opponent_result', 'data': result}))
+//            })
 
             
             
@@ -170,7 +176,7 @@ function Player(id, connection){
 }
 
 
-/*Player.prototype = {
+Player.prototype = {
     getId: function(){
         return {name: this.name, id: this.id};
     },
@@ -184,16 +190,16 @@ function Player(id, connection){
             }
         });
     }
-};*/
+};
 
 // ---------------------------------------------------------
 // Routine to broadcast the list of all players to everyone
 // ---------------------------------------------------------
 function BroadcastPlayersList(){
     var playersList = [];
-    Users.forEach(function(user){
+    Players.forEach(function(user){
         if (user.name !== ''){
-            playersList.push(user.getName());
+            playersList.push(user.getId());
         }
     });
 

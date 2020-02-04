@@ -15,7 +15,7 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
   @override
   static final TextEditingController _name = new TextEditingController();
   String playerName;
-  List<dynamic> playersList = <dynamic>[];
+  List<dynamic> lobbyList = <dynamic>[];
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
     ///   * rebuild the list of all the players
     ///
       case "players_list":
-        playersList = message["data"];
+        lobbyList = message["data"];
 
         // force rebuild
         setState(() {});
@@ -60,13 +60,12 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
     /// As we are not the new game initiator, we will be
     /// using the "O"
     ///
-      case 'new_game':
+      case 'next_question':
         Navigator.push(context, new MaterialPageRoute(
           builder: (BuildContext context)
           => new QuizPageState(
-            question: message["question"], // Name of the opponent
-            number: message["number"],
-            answers: message["answers"]
+            opponentName: 'test',
+            playerNum: 2
           ),
         ));
         break;
@@ -123,7 +122,7 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
   /// ------------------------------------------------------
   /// Builds the list of players
   /// ------------------------------------------------------
-  Widget _playersList() {
+  Widget _lobbyList() {
     ///
     /// If the user has not yet joined, do not display
     /// the list of players
@@ -137,12 +136,12 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
     /// For each of them, put a Button that could be used
     /// to launch a new game
     ///
-    List<Widget> children = playersList.map((playerInfo) {
+    List<Widget> children = lobbyList.map((playerInfo) {
       return new ListTile(
         title: new Text(playerInfo["name"]),
         trailing: new RaisedButton(
           onPressed: (){
-            _onPlayGame(playerInfo["question"], playerInfo["number"], playerInfo["answers"]);
+            _onPlayGame(playerInfo["name"], playerInfo["id"]);
           },
           child: new Text('Play'),
         ),
@@ -161,16 +160,15 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
   ///    * redirect to the game board
   ///      As we are the game initiator, we will play with the "X"
   /// --------------------------------------------------------------
-  _onPlayGame(String question, int number, List answers){
+  _onPlayGame(String name, String id){
     // We need to send the opponentId to initiate a new game
-    game.send('new_game', question);
+    game.send('join_game', id);
 
     Navigator.push(context, new MaterialPageRoute(
       builder: (BuildContext context)
       => new QuizPageState(
-        question: question,
-        number: number,
-        answers: answers
+        opponentName: name,
+        playerNum: 1
       ),
     ));
   }
@@ -185,7 +183,7 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
             children: <Widget>[
               _buildJoin(),
               new Text('List of players:'),
-              _playersList(),
+              _lobbyList(),
             ],
           ),
         ),

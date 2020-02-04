@@ -8,18 +8,21 @@ const buttoncolor = Color(0xffEEB868);
 class QuizPageState extends StatefulWidget {
   QuizPageState({
     Key key,
-    this.question,
-    this.number,
-    this.answers
+    this.opponentName,
+    this.playerNum,
   }): super(key: key);
 
-  final String question;
-  final int number;
-  final List answers;
+  final String opponentName;
+  final int playerNum;
+
+  String question;
+  int number;
+  List answers;
 
   @override
   QuizPage createState() => QuizPage();
 }
+
 class QuizPage extends State<QuizPageState> {
   @override
   void initState(){
@@ -61,6 +64,14 @@ class QuizPage extends State<QuizPageState> {
         // Force rebuild
         setState((){});
         break;
+
+      case 'next_question':
+        widget.answers = message["data"]["answer_choices"];
+        widget.number = message["data"]["question_number"];
+        widget.question = message["data"]["question_text"];
+
+        setState(() {});
+        break;
     }
   }
 
@@ -78,93 +89,106 @@ class QuizPage extends State<QuizPageState> {
         child: Column(
             children: <Widget>[
               SizedBox(height: 20),
-              questionCard(widget.number, widget.question),
+              questionCard(5, 'wtf is this'),
               SizedBox(height: 20),
-              answerCard(widget.answers)
+              answerCard(['a', 'b', 'c', 'd'])
+            ]
+        )
+    );
+  }
+
+  Widget questionCard(int number, String question) {
+    return Card(
+      color: cardcolor,
+      elevation: 20,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30.0),
+      ),
+      child: Column(
+        children: <Widget>[
+          ListTile(
+            contentPadding: EdgeInsets.all(20),
+            leading: Icon(Icons.question_answer),
+            title: Text("Question $number", style: GoogleFonts.bungee(fontSize: 30, textStyle: TextStyle(color: Colors.white, decoration: TextDecoration.underline))),
+            subtitle: Text(question, style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget answerCard(List answers) {
+    return Card(
+        color: cardcolor,
+        elevation: 20,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        child: Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(20.0),
+                child: FlatButton(
+                  padding: EdgeInsets.all(20.0),
+                  child: Text(answers[0], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  color: buttoncolor,
+                  onPressed: () {
+                    //game.send('select_answer', answers[0]);
+                    setState((){});
+                  },
+                ),
+              ),
+              Padding (
+                padding: EdgeInsets.all(20.0),
+                child: FlatButton(
+                  padding: EdgeInsets.all(20.0),
+                  child: Text(answers[1], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  color: buttoncolor,
+                  onPressed: () {
+                    //game.send('select_answer', answers[1]);
+                    setState((){});
+                  },
+                ),
+              ),
+              Padding (
+                padding: EdgeInsets.all(20.0),
+                child: FlatButton(
+                  padding: EdgeInsets.all(20.0),
+                  child: Text(answers[2], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  color: buttoncolor,
+                  onPressed: () {
+                    //game.send('select_answer', answers[2]);
+                    setState((){});
+                  },
+                ),
+              ),
+              Padding (
+                padding: EdgeInsets.all(20.0),
+                child: FlatButton(
+                  padding: EdgeInsets.all(20.0),
+                  child: Text(answers[3], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  color: buttoncolor,
+                  onPressed: () {
+                    //game.send('select_answer', answers[3]);
+                    setState((){});
+                  },
+                ),
+              )
             ]
         )
     );
   }
 }
 
-Widget questionCard(int number, String question) {
-  return Card(
-    color: cardcolor,
-    elevation: 20,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(30.0),
-    ),
-    child: Column(
-      children: <Widget>[
-        ListTile(
-          contentPadding: EdgeInsets.all(20),
-          leading: Icon(Icons.question_answer),
-          title: Text("Question $number", style: GoogleFonts.bungee(fontSize: 30, textStyle: TextStyle(color: Colors.white, decoration: TextDecoration.underline))),
-          subtitle: Text(question, style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget answerCard(List answers) {
-  return Card(
-      color: cardcolor,
-      elevation: 20,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30.0),
-      ),
-    child: Column(
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.all(20.0),
-          child: FlatButton(
-            padding: EdgeInsets.all(20.0),
-            child: Text(answers[0], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0),
-            ),
-            color: buttoncolor,
-            onPressed: () {},
-          ),
-        ),
-        Padding (
-          padding: EdgeInsets.all(20.0),
-          child: FlatButton(
-            padding: EdgeInsets.all(20.0),
-            child: Text(answers[1], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0),
-            ),
-            color: buttoncolor,
-            onPressed: () {},
-          ),
-        ),
-        Padding (
-          padding: EdgeInsets.all(20.0),
-          child: FlatButton(
-            padding: EdgeInsets.all(20.0),
-            child: Text(answers[2], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0),
-            ),
-            color: buttoncolor,
-            onPressed: () {},
-          ),
-        ),
-        Padding (
-          padding: EdgeInsets.all(20.0),
-          child: FlatButton(
-            padding: EdgeInsets.all(20.0),
-            child: Text(answers[3], style: GoogleFonts.bungee(fontSize: 20, textStyle: TextStyle(color: Colors.white))),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0),
-            ),
-            color: buttoncolor,
-            onPressed: () {},
-          ),
-        )
-      ]
-    )
-  );
-}
