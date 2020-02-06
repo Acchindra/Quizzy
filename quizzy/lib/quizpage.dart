@@ -97,7 +97,7 @@ class QuizPage extends State<QuizPageState> {
         body: Column(
             children: <Widget>[
               SizedBox(height: 20),
-              questionCard(5, 'wtf is this'),
+              questionCard(5, 'hopefully this works'),
               SizedBox(height: 20),
               answerCard(['a', 'b', 'c', 'd'])
             ]
