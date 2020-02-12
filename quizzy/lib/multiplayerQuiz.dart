@@ -15,7 +15,9 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
   @override
   static final TextEditingController _name = new TextEditingController();
   String playerName;
+  bool showCreateButton = true;
   List<dynamic> lobbyList = <dynamic>[];
+  List<dynamic> gameList = <dynamic>[];
 
   @override
   void initState() {
@@ -46,12 +48,12 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
     ///   * record the new list of players
     ///   * rebuild the list of all the players
     ///
-      case "players_list":
+      /*case "players_list":
         lobbyList = message["data"];
 
         // force rebuild
         setState(() {});
-        break;
+        break;*/
 
     ///
     /// When a game is launched by another player,
@@ -64,10 +66,17 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
         Navigator.push(context, new MaterialPageRoute(
           builder: (BuildContext context)
           => new QuizPageState(
-            opponentName: 'test',
-            playerNum: 2
+              opponentName: 'test',
+              playerNum: 2
           ),
         ));
+        break;
+
+      case 'new_game':
+        gameList.add(message["data"]);
+        debugPrint(gameList.toString());
+        showCreateButton = false;
+        setState(() {});
         break;
     }
   }
@@ -114,7 +123,7 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
   /// ------------------------------------------------------
   _onGameJoin() {
     game.send('join', _name.text);
-
+    createButton();
     /// Force a rebuild
     setState(() {});
   }
@@ -127,16 +136,39 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
     /// If the user has not yet joined, do not display
     /// the list of players
     ///
+    debugPrint('here');
     if (game.playerName == "") {
       return new Container();
     }
 
+    else {
+      _createListHead();
+      if (gameList.length != 0) {
+        if (gameList.length != 1 || gameList[0]["name"] != playerName) {
+          return list();
+        }
+
+        else {
+          return new Container();
+        }
+      }
+      else {
+        return new Container();
+      }
+    }
     ///
     /// Display the list of players.
     /// For each of them, put a Button that could be used
     /// to launch a new game
     ///
-    List<Widget> children = lobbyList.map((playerInfo) {
+
+  }
+
+  Widget _createListHead() {
+    return new Text("Game List");
+  }
+  Widget list() {
+    List<Widget> children = gameList.map((playerInfo) {
       return new ListTile(
         title: new Text(playerInfo["name"]),
         trailing: new RaisedButton(
@@ -147,12 +179,11 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
         ),
       );
     }).toList();
-
+    debugPrint('called');
     return new Column(
       children: children,
     );
   }
-
   /// --------------------------------------------------------------
   /// We launch a new Game, we need to:
   ///    * send the action "new_game", together with the ID
@@ -167,27 +198,47 @@ class MultiQuizState extends State<MultiPlayerQuiz> {
     Navigator.push(context, new MaterialPageRoute(
       builder: (BuildContext context)
       => new QuizPageState(
-        opponentName: name,
-        playerNum: 1
+          opponentName: name,
+          playerNum: 1
       ),
     ));
+  }
+
+  Widget createButton() {
+    if (showCreateButton) {
+      return new FloatingActionButton(
+        heroTag: "createGameButton",
+        child:Text(
+            "Create Game",
+            textAlign: TextAlign.center,
+        ),
+        backgroundColor: Colors.green,
+        onPressed: () {
+          game.send('create_game', playerName);
+        },
+      );
+    }
+
+    else {
+      return new Container();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       backgroundColor: bgcolor,
-        body: SingleChildScrollView(
-          child: new Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              _buildJoin(),
-              new Text('List of players:'),
-              _lobbyList(),
-            ],
-          ),
+      body: SingleChildScrollView(
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            _buildJoin(),
+            _lobbyList(),
+            createButton(),
+          ],
         ),
-      );
+      ),
+    );
   }
 }
 
