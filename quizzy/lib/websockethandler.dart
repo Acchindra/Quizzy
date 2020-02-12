@@ -5,6 +5,11 @@ WebSocketsNotifications sockets = new WebSocketsNotifications();
 
 const String _SERVER_ADDRESS = "ws://192.168.1.15:34263";
 
+const String SERVER_ADDRESS = "ws://73.169.148.60:34263";
+
+//192.168.40.217
+
+
 class WebSocketsNotifications {
   static final WebSocketsNotifications _sockets = new WebSocketsNotifications._internal();
 
